@@ -55,7 +55,7 @@ class Project(models.Model, ProjectBase):
     name = models.TextField("name memo", help_text="project name")
 
     bookset = models.ForeignKey(BookSet, related_name="projects",
-        help_text="""The bookset for this project.""")
+        help_text="""The bookset for this project.""",on_delete=models.PROTECT)
 
     def accounts(self):
         return self.bookset.accounts()
@@ -94,7 +94,7 @@ class Account(models.Model, _AccountApi):
     #    support this kind of organization.
 
     accid = models.AutoField(primary_key=True)
-    bookset = models.ForeignKey(BookSet, db_column='org', related_name='account_objects')
+    bookset = models.ForeignKey(BookSet, db_column='org', related_name='account_objects',on_delete=models.PROTECT)
 
     def get_bookset(self):
         return self.bookset
@@ -164,7 +164,7 @@ class ThirdParty(models.Model):
             tabel to hold all the information you actually need.""")
 
     account = models.ForeignKey(Account, related_name="third_parties",
-        help_text="""The parent account: typically an 'AR' or 'AP' account.""")
+        help_text="""The parent account: typically an 'AR' or 'AP' account.""",on_delete=models.PROTECT)
 
     def get_account(self):
         return self.account
@@ -206,7 +206,7 @@ class Transaction(models.Model):
     description = models.TextField()
 
     project = models.ForeignKey(Project, related_name="transactions",
-        help_text="""The project for this transaction (if any).""", null=True)
+        help_text="""The project for this transaction (if any).""", null=True,on_delete=models.PROTECT)
 
     def __str__(self):
         return "<Transaction {0}: {1}/>".format(self.tid, self.description)
@@ -243,9 +243,9 @@ class AccountEntry(models.Model):
 
     aeid = models.AutoField(primary_key=True)
 
-    transaction = models.ForeignKey(Transaction, db_column='tid', related_name='entries')
+    transaction = models.ForeignKey(Transaction, db_column='tid', related_name='entries',on_delete=models.PROTECT)
 
-    account = models.ForeignKey(Account, db_column='accid', related_name='entries')
+    account = models.ForeignKey(Account, db_column='accid', related_name='entries',on_delete=models.PROTECT)
 
     amount = models.DecimalField(max_digits=8, decimal_places=2,
         help_text="""Debits: positive; Credits: negative.""")
@@ -253,7 +253,7 @@ class AccountEntry(models.Model):
     description = models.TextField(
         help_text="""An optional "memo" field for this leg of the transaction.""")
 
-    third_party = models.ForeignKey(ThirdParty, related_name='account_entries', null=True)
+    third_party = models.ForeignKey(ThirdParty, related_name='account_entries', null=True,on_delete=models.PROTECT)
 
     def __str__(self):
         base = "%d %s" % (self.amount, self.description)
